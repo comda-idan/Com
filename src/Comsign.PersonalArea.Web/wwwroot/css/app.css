@@ -58,6 +58,8 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 900; letter-spacing:
 p { margin: 0; }
 
 .is-hidden { display: none !important; }
+/* תכונת hidden חייבת לגבור על display:flex של הצ׳אט/אזהרת הניתוק */
+[hidden] { display: none !important; }
 
 .eyebrow {
   font-family: var(--font-display);

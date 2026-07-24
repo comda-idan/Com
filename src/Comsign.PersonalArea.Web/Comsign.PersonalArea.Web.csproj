@@ -1,0 +1,34 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>Comsign.PersonalArea.Web</RootNamespace>
+    <AssemblyName>Comsign.PersonalArea.Web</AssemblyName>
+    <InvariantGlobalization>false</InvariantGlobalization>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <EnableRequestDelegateGenerator>true</EnableRequestDelegateGenerator>
+    <UserSecretsId>comsign-personal-area-demo</UserSecretsId>
+  </PropertyGroup>
+
+  <!--
+    מימוש ה-MySQL נשמר בקוד המקור כתשתית לעתיד, אך אינו נכלל בקומפילציה
+    כל עוד הדמו עובד מול Local Storage. להפעלה: הסירו את השורה הבאה,
+    הוסיפו את חבילות ה-NuGet המסומנות למטה ושנו Storage:Provider ל-"MySql".
+  -->
+  <ItemGroup>
+    <Compile Remove="Data\MySql\**\*.cs" />
+    <None Include="Data\MySql\**\*.cs" />
+  </ItemGroup>
+
+  <!--
+    חבילות NuGet נדרשות למעבר ל-MySQL (להוסיף בעת ההחלפה):
+      <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="10.0.0" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.0" PrivateAssets="all" />
+    כרגע הפרויקט נבנה ללא תלויות חיצוניות כלל.
+  -->
+
+  <Import Project="..\..\build\Version.targets" />
+
+</Project>

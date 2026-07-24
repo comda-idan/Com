@@ -1,0 +1,85 @@
+<Project>
+
+  <!--
+    ניהול גרסאות אוטומטי
+    ====================
+    version.json הוא מקור האמת היחיד לגרסה.
+    בכל Build/Publish הערך "build" עולה באחד, והגרסה המלאה מוזרקת ל-Assembly
+    וגם לקובץ wwwroot/version.json שממנו האתר קורא את הגרסה בזמן ריצה.
+
+    להעלאת major/minor/patch יש להשתמש ב-scripts/bump-version.sh (או .ps1).
+    לביטול ההגדלה האוטומטית (למשל ב-CI): dotnet build -p:AutoIncrementBuild=false
+  -->
+
+  <PropertyGroup>
+    <VersionFilePath Condition="'$(VersionFilePath)' == ''">$(MSBuildThisFileDirectory)../version.json</VersionFilePath>
+    <AutoIncrementBuild Condition="'$(AutoIncrementBuild)' == ''">true</AutoIncrementBuild>
+  </PropertyGroup>
+
+  <UsingTask TaskName="BumpBuildNumber"
+             TaskFactory="RoslynCodeTaskFactory"
+             AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+    <ParameterGroup>
+      <VersionFile ParameterType="System.String" Required="true" />
+      <Increment ParameterType="System.Boolean" Required="true" />
+      <MirrorTo ParameterType="System.String" Required="false" />
+      <FullVersion ParameterType="System.String" Output="true" />
+      <AssemblyVersionText ParameterType="System.String" Output="true" />
+    </ParameterGroup>
+    <Task>
+      <Using Namespace="System" />
+      <Using Namespace="System.IO" />
+      <Using Namespace="System.Globalization" />
+      <Using Namespace="System.Text.RegularExpressions" />
+      <Code Type="Fragment" Language="cs"><![CDATA[
+        var json = File.ReadAllText(VersionFile);
+        Func<string, int> read = key =>
+        {
+            var m = Regex.Match(json, "\"" + key + "\"\\s*:\\s*(\\d+)");
+            return m.Success ? int.Parse(m.Groups[1].Value, CultureInfo.InvariantCulture) : 0;
+        };
+
+        int major = read("major"), minor = read("minor"), patch = read("patch"), build = read("build");
+        var channelMatch = Regex.Match(json, "\"channel\"\\s*:\\s*\"([^\"]*)\"");
+        var channel = channelMatch.Success ? channelMatch.Groups[1].Value : "demo";
+
+        if (Increment)
+        {
+            build++;
+            var stamp = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ", CultureInfo.InvariantCulture);
+            json = Regex.Replace(json, "(\"build\"\\s*:\\s*)\\d+", "${1}" + build);
+            json = Regex.Replace(json, "(\"updatedUtc\"\\s*:\\s*\")[^\"]*(\")", "${1}" + stamp + "${2}");
+            File.WriteAllText(VersionFile, json);
+        }
+
+        FullVersion = string.Format(CultureInfo.InvariantCulture, "{0}.{1}.{2}.{3}", major, minor, patch, build);
+        AssemblyVersionText = string.Format(CultureInfo.InvariantCulture, "{0}.{1}.{2}.0", major, minor, patch);
+
+        if (!string.IsNullOrEmpty(MirrorTo))
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(MirrorTo));
+            File.WriteAllText(MirrorTo, json);
+        }
+      ]]></Code>
+    </Task>
+  </UsingTask>
+
+  <Target Name="ApplyProductVersion" BeforeTargets="GetAssemblyVersion;GenerateAssemblyInfo;BeforeBuild;BeforeCompile">
+    <BumpBuildNumber VersionFile="$(VersionFilePath)"
+                     Increment="$(AutoIncrementBuild)"
+                     MirrorTo="$(MSBuildProjectDirectory)/wwwroot/version.json">
+      <Output TaskParameter="FullVersion" PropertyName="ComsignFullVersion" />
+      <Output TaskParameter="AssemblyVersionText" PropertyName="ComsignAssemblyVersion" />
+    </BumpBuildNumber>
+
+    <PropertyGroup>
+      <Version>$(ComsignFullVersion)</Version>
+      <FileVersion>$(ComsignFullVersion)</FileVersion>
+      <AssemblyVersion>$(ComsignAssemblyVersion)</AssemblyVersion>
+      <InformationalVersion>$(ComsignFullVersion)</InformationalVersion>
+    </PropertyGroup>
+
+    <Message Importance="high" Text="Comsign Personal Area version: $(ComsignFullVersion)" />
+  </Target>
+
+</Project>

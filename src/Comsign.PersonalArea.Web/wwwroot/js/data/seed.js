@@ -25,7 +25,7 @@ export const SEED = Object.freeze({
       expiresOn: '2026-08-20',
       status: 'Active',
       renewalPaid: false,
-      image: '/assets/smartcard.png'
+      image: 'assets/smartcard.png'
     },
     {
       credentialId: 'cred-tk-01',
@@ -38,7 +38,7 @@ export const SEED = Object.freeze({
       expiresOn: '2028-06-20',
       status: 'Active',
       renewalPaid: false,
-      image: '/assets/token.png'
+      image: 'assets/token.png'
     },
     {
       credentialId: 'cred-sc-00',
@@ -51,7 +51,7 @@ export const SEED = Object.freeze({
       expiresOn: '2022-08-20',
       status: 'Expired',
       renewalPaid: false,
-      image: '/assets/smartcard.png'
+      image: 'assets/smartcard.png'
     },
     {
       credentialId: 'cred-tk-00',
@@ -64,7 +64,7 @@ export const SEED = Object.freeze({
       expiresOn: '2024-06-20',
       status: 'Expired',
       renewalPaid: false,
-      image: '/assets/token.png'
+      image: 'assets/token.png'
     }
   ],
 

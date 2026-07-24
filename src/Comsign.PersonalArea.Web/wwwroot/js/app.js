@@ -243,12 +243,12 @@ function hideIdleWarning() {
 async function showVersion() {
   let version = '—';
   try {
-    const response = await fetch('/version.json', { cache: 'no-store' });
+    const response = await fetch('version.json', { cache: 'no-store' });
     const data = await response.json();
     version = `${data.major}.${data.minor}.${data.patch}.${data.build}`;
   } catch {
     try {
-      const response = await fetch('/api/version', { cache: 'no-store' });
+      const response = await fetch(`${APP_CONFIG.apiBaseUrl}/version`, { cache: 'no-store' });
       version = (await response.json()).version;
     } catch {
       version = 'לא זמינה';
@@ -264,7 +264,10 @@ async function showVersion() {
 function bindPwa() {
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/sw.js').catch(() => { /* ללא מצב לא-מקוון */ });
+      // נתיב יחסי לבסיס הנוכחי — עובד גם תחת תת-נתיב (GitHub Pages) וגם בשורש (.NET).
+      const base = new URL('.', document.baseURI);
+      navigator.serviceWorker.register(new URL('sw.js', base), { scope: base.pathname })
+        .catch(() => { /* ללא מצב לא-מקוון */ });
     });
   }
 

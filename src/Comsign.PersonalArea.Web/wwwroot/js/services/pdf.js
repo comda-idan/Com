@@ -22,7 +22,7 @@ function loadLogo() {
     const img = new Image();
     img.onload = () => resolve(img);
     img.onerror = () => resolve(null);
-    img.src = '/assets/comsign-logo.png';
+    img.src = 'assets/comsign-logo.png';
   });
   return logoPromise;
 }
